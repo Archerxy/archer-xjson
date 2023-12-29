@@ -323,13 +323,21 @@ class JSONReflect {
 		if(BOOL_TYPE.equals(cls.getName())) {
 			return (boolean) val;
 		} else if(BYTE_TYPE.equals(cls.getName())) {
-			
+			if(val instanceof Long) {
+				return ((Long) val).byteValue();
+			}
 			return (byte)((int) val);
 		} else if(CHAR_TYPE.equals(cls.getName())) {
 			return (char) val;
 		} else if(SHORT_TYPE.equals(cls.getName())) {
-			return (short) val;
+			if(val instanceof Long) {
+				return ((Long) val).shortValue();
+			}
+			return (short)((int) val);
 		} else if(INT_TYPE.equals(cls.getName())) {
+			if(val instanceof Long) {
+				return ((Long) val).intValue();
+			}
 			return (int) val;
 		} else if(LONG_TYPE.equals(cls.getName())) {
 			return (long) val;
@@ -462,6 +470,7 @@ class JSONReflect {
 					f.setAccessible(true);
 					f.set(instance, fromJavaType(ft, fieldVal));
 				} catch(Exception e) {
+					e.printStackTrace();
 					throw new XJSONException(
 							XJSONException.getErrorMsg(f, val.get(f.getName())));
 				}

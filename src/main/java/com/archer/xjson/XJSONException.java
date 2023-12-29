@@ -28,6 +28,10 @@ public class XJSONException extends RuntimeException {
 		}
 	}
 	
+	static String getErrorMsg(Field f, Object val, String message) {
+		return getErrorMsg(f, val) + "; " + message;
+	}
+	
 	static String getErrorMsg(Field f, Object val) {
 		String msg = "can not set ";
 		if(val instanceof LinkedHashMap) {
@@ -38,7 +42,7 @@ public class XJSONException extends RuntimeException {
 					"("+f.getDeclaringClass().getName()+")";
 		} else {
 			msg += val + " to " + f.getName() + 
-					"("+f.getDeclaringClass().getName()+")";
+					"("+f.getClass().getName()+")";
 		}
 		return msg;
 	}

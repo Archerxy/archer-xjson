@@ -426,6 +426,9 @@ class JSONDecoder {
 	static Number parseToNumber(char[] in) throws XJSONException {
 		String s = new String(in);
 		try {
+			return Integer.parseInt(s);
+		} catch(Exception ignore) {}
+		try {
 			return Long.parseLong(s);
 		} catch(Exception ignore) {}
 		try {
