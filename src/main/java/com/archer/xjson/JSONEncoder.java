@@ -270,7 +270,11 @@ class JSONEncoder {
 		}
 		Class<?> superCls = clazz.getSuperclass();
 		collectAllFields(superCls, collected);
-		Field[] fields = clazz.getDeclaredFields();
+		Field[] fields = JSONCache.get(clazz);
+		if(fields == null) {
+			fields = clazz.getDeclaredFields();
+			JSONCache.save(clazz, fields);
+		}
 		for(Field f: fields) {
 			if(f.getName().startsWith(INNER_CLASS_FIELD)) {
 				continue;

@@ -442,7 +442,11 @@ class JSONReflect {
 					"no arguments constructor is required with class '" 
 					+ cls.getName() + "'"); 
 		}
-		Field[] fields = cls.getDeclaredFields();
+		Field[] fields = JSONCache.get(cls);
+		if(fields == null) {
+			fields = cls.getDeclaredFields();
+			JSONCache.save(cls, fields);
+		}
 		TreeSet<String> fieldNameSet = null;
 		if(strictJsonMode) {
 			fieldNameSet = new TreeSet<>();
@@ -511,7 +515,11 @@ class JSONReflect {
 		if(Object.class.equals(superCls)) {
 			return ;
 		}
-		Field[] fields = superCls.getDeclaredFields();
+		Field[] fields = JSONCache.get(superCls);
+		if(fields == null) {
+			fields = superCls.getDeclaredFields();
+			JSONCache.save(superCls, fields);
+		}
 		if(strictJsonMode) {
 			fieldNameSet = new TreeSet<>();
 		}
