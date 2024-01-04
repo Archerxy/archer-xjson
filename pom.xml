@@ -4,7 +4,7 @@
 
   <groupId>com.archer</groupId>
   <artifactId>xjson</artifactId>
-  <version>1.1.0</version>
+  <version>1.1.1</version>
   <packaging>jar</packaging>
 
   <name>xjson</name>
@@ -18,7 +18,7 @@
 
 
   <build>
-    <finalName>archer-xjson-1.1.0</finalName>
+    <finalName>archer-xjson-${version}</finalName>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

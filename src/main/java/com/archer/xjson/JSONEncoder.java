@@ -10,8 +10,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -51,6 +53,7 @@ class JSONEncoder {
 	static final String INNER_CLASS_FIELD = "this$";
 	
 
+	static final int DEFAULT_FIELD_COUNT = 24;
 	static final int DEFAULT_ARRAY_LEN = 16;
 	static final int BASE_MAP_LINE_LENGTH = 256;
 	static final int BASE_COLLECTION_LINE_LENGTH = 256;
@@ -261,22 +264,13 @@ class JSONEncoder {
 		return sb.toString();
 	}
 	
-	static String formatClass(Object data, int tabCount, boolean isVal, JSONStuff stuff) 
-			throws IllegalArgumentException, IllegalAccessException {
-		String base = "";
-		if(stuff.beautify) {
-			for(int i = 0; i < tabCount; i++) {
-				base += TAB;
-			}
+	static void collectAllFields(Class<?> clazz, List<Field> collected) {
+		if(Object.class.equals(clazz)) {
+			return ;
 		}
-		Class<?> clazz = data.getClass();
+		Class<?> superCls = clazz.getSuperclass();
+		collectAllFields(superCls, collected);
 		Field[] fields = clazz.getDeclaredFields();
-		StringBuilder sb = new StringBuilder(fields.length * BASE_MAP_LINE_LENGTH);
-		sb.append(B_BRACES_L);
-		if(stuff.beautify) {
-			sb.append(ENTER);
-		}
-		int index = 1;
 		for(Field f: fields) {
 			if(f.getName().startsWith(INNER_CLASS_FIELD)) {
 				continue;
@@ -287,6 +281,30 @@ class JSONEncoder {
 			if(Modifier.isTransient(f.getModifiers())) {
 				continue;
 			}
+			collected.add(f);
+		}
+		System.out.println("collected.size1 = " + collected.size());
+	}
+	
+	static String formatClass(Object data, int tabCount, boolean isVal, JSONStuff stuff) 
+			throws IllegalArgumentException, IllegalAccessException {
+		String base = "";
+		if(stuff.beautify) {
+			for(int i = 0; i < tabCount; i++) {
+				base += TAB;
+			}
+		}
+		List<Field> fields = new ArrayList<>(DEFAULT_FIELD_COUNT);
+		collectAllFields(data.getClass(), fields);
+		int len = fields.size();
+		StringBuilder sb = new StringBuilder(len * BASE_MAP_LINE_LENGTH);
+		sb.append(B_BRACES_L);
+		if(stuff.beautify) {
+			sb.append(ENTER);
+		}
+		int index = 0;
+		for(Field f: fields) {
+			++index;
 			if(stuff.beautify) {
 				sb.append(base).append(TAB);
 			}
@@ -299,13 +317,12 @@ class JSONEncoder {
 						" is self-referencing");
 			}
 			sb.append(formatObject(fv, tabCount + 1, true, stuff));
-			if(index != fields.length) {
+			if(index != len) {
 				sb.append(COMMA);
 			}
 			if(stuff.beautify) {
 				sb.append(ENTER);
 			}
-			++index;
 		}
 		if(stuff.beautify) {
 			sb.append(base);

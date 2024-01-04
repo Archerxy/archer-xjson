@@ -360,12 +360,18 @@ class JSONReflect {
 			return (String) val;
 		}
 		if(cls.equals(Byte.class)) {
+			if(Integer.class.equals(val.getClass())) {
+				return ((Integer) val).byteValue();
+			}
 			return ((Long) val).byteValue();
 		}
 		if(cls.equals(Character.class)) {
 			return (Character) val;
 		}
 		if(cls.equals(Integer.class)) {
+			if(Integer.class.equals(val.getClass())) {
+				return (Integer) val;
+			}
 			return ((Long) val).intValue();
 		}
 		if(cls.equals(Long.class)) {
@@ -445,6 +451,7 @@ class JSONReflect {
 		if(childTypes != null) {
 			generics = parseGenericString(cls.toGenericString());
 		}
+		int count = 0;
 		for(Field f: fields) {
 			if(f.getName().startsWith(INNER_CLASS_FIELD)) {
 				continue;
@@ -455,6 +462,7 @@ class JSONReflect {
 			if(Modifier.isTransient(f.getModifiers())) {
 				continue;
 			}
+			count++;
 			Object fieldVal = val.getOrDefault(f.getName(), null);
 			if(fieldVal != null) {
 				Type ft = f.getGenericType();
@@ -484,6 +492,9 @@ class JSONReflect {
 				fieldNameSet.add(f.getName());
 			}
 		}
+		if(count < val.size()) {
+			reflectToSupperCls(cls.getSuperclass(), val, childTypes, count, fieldNameSet, instance);
+		}
 		
 		if(strictJsonMode) {
 			for(String k: val.keySet()) {
@@ -494,6 +505,64 @@ class JSONReflect {
 			}
 		}
 		return instance;
+	}
+	
+	void reflectToSupperCls(Class<?> superCls, LinkedHashMap<String, Object> val, Type[] childTypes, int oldCount, TreeSet<String> fieldNameSet, Object instance) {
+		if(Object.class.equals(superCls)) {
+			return ;
+		}
+		Field[] fields = superCls.getDeclaredFields();
+		if(strictJsonMode) {
+			fieldNameSet = new TreeSet<>();
+		}
+		String[] generics = null;
+		if(childTypes != null) {
+			generics = parseGenericString(superCls.toGenericString());
+		}
+		int count = oldCount;
+		for(Field f: fields) {
+			if(f.getName().startsWith(INNER_CLASS_FIELD)) {
+				continue;
+			}
+			if(Modifier.isStatic(f.getModifiers())) {
+				continue;
+			}
+			if(Modifier.isTransient(f.getModifiers())) {
+				continue;
+			}
+			count++;
+			Object fieldVal = val.getOrDefault(f.getName(), null);
+			if(fieldVal != null) {
+				Type ft = f.getGenericType();
+				if(childTypes != null && ft instanceof TypeVariable) {
+					for(int i = 0; i < childTypes.length; i++) {
+						if(generics[i].equals(f.getGenericType().getTypeName())) {
+							ft = childTypes[i];
+							break ;
+						}
+					}
+				}
+				try {
+					f.setAccessible(true);
+					f.set(instance, fromJavaType(ft, fieldVal));
+				} catch(Exception e) {
+					e.printStackTrace();
+					throw new XJSONException(
+							XJSONException.getErrorMsg(f, val.get(f.getName())));
+				}
+			} else {
+				if(strictClassMode) {
+					throw new XJSONException(
+							XJSONException.getErrorMsg(f.getName(), superCls, true));
+				}
+			}
+			if(strictJsonMode) {
+				fieldNameSet.add(f.getName());
+			}
+		}
+		if(count < val.size()) {
+			reflectToSupperCls(superCls.getSuperclass(), val, childTypes, count, fieldNameSet, instance);
+		}
 	}
 	
 	static String[] parseGenericString(String genericClassString) {
