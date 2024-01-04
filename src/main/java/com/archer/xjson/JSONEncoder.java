@@ -287,7 +287,6 @@ class JSONEncoder {
 			}
 			collected.add(f);
 		}
-		System.out.println("collected.size1 = " + collected.size());
 	}
 	
 	static String formatClass(Object data, int tabCount, boolean isVal, JSONStuff stuff) 
