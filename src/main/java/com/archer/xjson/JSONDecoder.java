@@ -1,5 +1,6 @@
 package com.archer.xjson;
 
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -473,6 +474,12 @@ class JSONDecoder {
 		return reflector.reflectOneClass(obj, ref);
 	}
 	
+	static <T> T parseToClass(String json, Type type, JSONReflect reflector) 
+			throws XJSONException {
+		LinkedHashMap<String, Object> obj = parseToMap(json);
+		return reflector.reflectOneClass(obj, type);
+	}
+	
 	static <T> LinkedList<T> parseToClassList(String json, Class<T> clazz, JSONReflect reflector) 
 			throws XJSONException {
 		LinkedList<Object> obj = parseToList(json);
@@ -483,5 +490,11 @@ class JSONDecoder {
 			throws XJSONException {
 		LinkedList<Object> obj = parseToList(json);
 		return reflector.reflectOneList(obj, ref);
+	}
+	
+	static <T> LinkedList<T> parseToClassList(String json, Type type, JSONReflect reflector) 
+			throws XJSONException {
+		LinkedList<Object> obj = parseToList(json);
+		return reflector.reflectOneList(obj, type);
 	}
 }

@@ -87,6 +87,16 @@ class JSONReflect {
 		}
 		return ret;
 	}
+	
+	@SuppressWarnings("unchecked")
+	<T> LinkedList<T> reflectOneList(LinkedList<Object> obj, Type type) 
+			throws XJSONException {
+		LinkedList<T> ret = new LinkedList<T>();
+		for(Object val: obj) {
+			ret.add((T) fromJavaType(type, val));
+		}
+		return ret;
+	}
 
 	@SuppressWarnings("unchecked")
 	<T> T reflectOneClass(LinkedHashMap<String, Object> obj, Class<T> clazz) 
@@ -98,6 +108,12 @@ class JSONReflect {
 	<T> T reflectOneClass(LinkedHashMap<String, Object> obj, JavaTypeRef<T> ref) 
 			throws XJSONException {
 		return (T) fromJavaType(ref.getJavaType(), obj);
+	}
+	
+	@SuppressWarnings("unchecked")
+	<T> T reflectOneClass(LinkedHashMap<String, Object> obj, Type type) 
+			throws XJSONException {
+		return (T) fromJavaType(type, obj);
 	}
 	
 	void reflectToField(Field f, Object classObj, Object jsonData) 

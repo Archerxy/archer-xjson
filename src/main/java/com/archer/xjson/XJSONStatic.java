@@ -1,5 +1,6 @@
 package com.archer.xjson;
 
+import java.lang.reflect.Type;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 
@@ -35,6 +36,12 @@ public class XJSONStatic {
 		}
 		return JSONDecoder.parseToClass(json,  ref, reflector);
 	}
+	public static <T> T parse(String json, Type type) throws XJSONException {
+		if(null == json || json.trim().isEmpty()) {
+			throw new XJSONException("input json string can not be null or empty.");
+		}
+		return JSONDecoder.parseToClass(json,  type, reflector);
+	}
 
 	public static <T> LinkedList<T> parseList(String json, Class<T> clazz) throws XJSONException {
 		if(null == json || json.trim().isEmpty()) {
@@ -47,6 +54,12 @@ public class XJSONStatic {
 			throw new XJSONException("input json string can not be null or empty.");
 		}
 		return JSONDecoder.parseToClassList(json, ref, reflector);
+	}
+	public static <T> LinkedList<T> parseList(String json, Type type) throws XJSONException {
+		if(null == json || json.trim().isEmpty()) {
+			throw new XJSONException("input json string can not be null or empty.");
+		}
+		return JSONDecoder.parseToClassList(json, type, reflector);
 	}
 	
 	public static String stringify(Object data) throws XJSONException  {
