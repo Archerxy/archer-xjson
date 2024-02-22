@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -343,6 +344,11 @@ class JSONEncoder {
 		}
 		
 		StringBuilder sb = new StringBuilder(DEFAULT_ARRAY_LEN * BASE_COLLECTION_LINE_LENGTH);
+		if(data instanceof byte[]) {
+    		sb.append(QUOTE).append(new String(Base64.getEncoder().encode((byte[])data)))
+    			.append(QUOTE);
+    		return sb.toString();
+		}
 		sb.append(BRACES_L);
 		if(stuff.beautify) {
 			sb.append(ENTER);
@@ -354,18 +360,6 @@ class JSONEncoder {
     			sb.deleteCharAt(sb.length() - 1);
     		}
 	    	for(boolean b: (boolean[])data) {
-	    		sb.append(b);
-	    		if(index != 1) {
-	    			sb.append(COMMA).append(SPACE);
-	    		}
-	    		--index;
-	    	}
-		} else if(data instanceof byte[]) {
-			int index = ((byte[])data).length;
-    		if(stuff.beautify) {
-    			sb.deleteCharAt(sb.length() - 1);
-    		}
-	    	for(byte b: (byte[])data) {
 	    		sb.append(b);
 	    		if(index != 1) {
 	    			sb.append(COMMA).append(SPACE);

@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -138,7 +139,7 @@ class JSONReflect {
 				return reflectToBoolArr((LinkedList<Boolean>)val);
 			}
 			if(BYTE_ARR.equals(clsName)) {
-				return reflectToByteArr((LinkedList<Long>)val);
+				return reflectToByteArr((String)val);
 			}
 			if(CHAR_ARR.equals(clsName)) {
 				return reflectToCharArr((LinkedList<Character>)val);
@@ -271,13 +272,13 @@ class JSONReflect {
 		return ret;
 	}
 
-	static byte[] reflectToByteArr(LinkedList<Long> val) {
-		byte[] ret = new byte[val.size()];
-		int i = 0;
-		for(Long b: val) {
-			ret[i++] = (byte) b.intValue();
-		}
-		return ret;
+	static byte[] reflectToByteArr(String val) {
+		return Base64.getDecoder().decode(val.getBytes());
+//		int i = 0;
+//		for(Long b: val) {
+//			ret[i++] = (byte) b.intValue();
+//		}
+//		return ret;
 	}
 
 	static char[] reflectToCharArr(LinkedList<Character> val) {
