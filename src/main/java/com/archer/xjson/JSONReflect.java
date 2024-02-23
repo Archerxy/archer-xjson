@@ -1,5 +1,6 @@
 package com.archer.xjson;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
@@ -451,14 +452,7 @@ class JSONReflect {
 	
 	Object reflectUnknownClass(Class<?> cls, LinkedHashMap<String, Object> val, Type[] childTypes) 
 			throws XJSONException {
-		Object instance;
-		try {
-			instance = cls.newInstance();
-		} catch (Exception e) {
-			throw new XJSONException(
-					"no arguments constructor is required with class '" 
-					+ cls.getName() + "'"); 
-		}
+		Object instance = newInstance(cls);
 		Field[] fields = JSONCache.get(cls);
 		if(fields == null) {
 			fields = cls.getDeclaredFields();
@@ -604,5 +598,29 @@ class JSONReflect {
 		}
 		String generic = new String(Arrays.copyOfRange(chars, i, chars.length - 1));
 		return generic.split(COMMA);
+	}
+	
+	static Object newInstance(Class<?> cls) {
+		XJSONConstructor xjsonConstructor = JSONCache.getConstructor(cls);
+		if(xjsonConstructor != null) {
+			return xjsonConstructor.newInstance();
+		}
+		int paramCount = cls.isMemberClass() ? 1 : 0;
+		Constructor<?>[] constructors = cls.getConstructors();
+		for(Constructor<?> constructor : constructors) {
+			if(constructor.getParameterCount() == paramCount) {
+				Object[] params = new Object[paramCount];
+				try {
+					JSONCache.saveConstructor(cls, constructor, params);
+					return constructor.newInstance(params);
+				} catch (Exception e) {
+					throw new XJSONException("can not construct class '" +
+							cls.getName() + "'");
+				}
+			}
+		}
+		throw new XJSONException(
+				"no arguments constructor is required with class '" 
+				+ cls.getName() + "'"); 
 	}
 }
