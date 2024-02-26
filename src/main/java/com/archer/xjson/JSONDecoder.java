@@ -345,6 +345,10 @@ class JSONDecoder {
 					state = A_OBJ_S;
 					continue;
 				}
+				if(BRACES_R == chars[i]) {
+					state = A_E;
+					continue;
+				}
 				throw new XJSONException(XJSONException.getErrorMsg(chars, i-1));
 			}
 			if(A_NUM_S == state) {
