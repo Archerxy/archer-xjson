@@ -605,17 +605,22 @@ class JSONReflect {
 		if(xjsonConstructor != null) {
 			return xjsonConstructor.newInstance();
 		}
-		int paramCount = cls.isMemberClass() ? 1 : 0;
 		Constructor<?>[] constructors = cls.getConstructors();
 		for(Constructor<?> constructor : constructors) {
-			if(constructor.getParameterCount() == paramCount) {
-				Object[] params = new Object[paramCount];
+			Object[] params = null;
+			if(constructor.getParameterCount() == 0) {
+				params = new Object[0];
+			} else if(constructor.getParameterCount() == 1) { //non-static inner class
+				params = new Object[1];
+			}
+			if(params != null) {
+				JSONCache.saveConstructor(cls, constructor, params);
 				try {
-					JSONCache.saveConstructor(cls, constructor, params);
+					constructor.setAccessible(true);
 					return constructor.newInstance(params);
 				} catch (Exception e) {
-					throw new XJSONException("can not construct class '" +
-							cls.getName() + "'");
+					throw new RuntimeException("can not construct class '" +
+							cls.getName() + "'", e);
 				}
 			}
 		}
