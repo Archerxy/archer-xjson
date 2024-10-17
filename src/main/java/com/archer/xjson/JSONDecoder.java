@@ -21,6 +21,7 @@ class JSONDecoder {
 	static final char QUOTE = '"';
 	static final char SINGLE_QUOTE = '\'';
 	static final char BACKSLASH = '\\';
+	static final char NEG = '-';
 
 	static final char[] NULL = {'n', 'u', 'l', 'l'};
 	static final char[] TRUE = {'t', 'r', 'u', 'e'};
@@ -138,6 +139,12 @@ class JSONDecoder {
 					continue;
 				}
 				if(48 <= chars[i] && chars[i] <= 57) {
+					state = V_STARTED;
+					valL = i;
+					numVal = true;
+					continue;
+				}
+				if(NEG == chars[i]) {
 					state = V_STARTED;
 					valL = i;
 					numVal = true;
